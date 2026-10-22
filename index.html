@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CODEX Manuscritos no Brasil</title>
+<style>
+/* Wireframe: greys only, one system font, outlined boxes. Full-width bar on top, content in a wide left-aligned column. */
+:root {
+  --bg: #ffffff;
+  --fg: #222222;
+  --muted: #6f6f6f;
+  --line: #9a9a9a;
+  --soft: #d6d6d6;
+  --fill: #eeeeee;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #1b1b1b; --fg: #e6e6e6; --muted: #a0a0a0; --line: #666666; --soft: #444444; --fill: #2a2a2a; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #1b1b1b; --fg: #e6e6e6; --muted: #a0a0a0; --line: #666666; --soft: #444444; --fill: #2a2a2a; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.5; padding-block: 0 48px; }
+button, input, select, a.box { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.inner { max-width: 1200px; margin: 0 auto; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+@media (max-width: 520px) { .inner { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); } }
+
+/* Top bar */
+.topbar { border-bottom: 1px solid var(--line); }
+.topbar .inner { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px; padding-block: 16px; }
+.logo { border: 1px solid var(--line); padding: 4px 12px; font-weight: 700; letter-spacing: .1em; background: none; cursor: pointer; }
+.menu { display: flex; flex-wrap: wrap; gap: 4px 24px; }
+@media (max-width: 520px) { .menu { gap: 4px 16px; } }
+.toolbar { display: flex; flex-direction: column; gap: 12px; }
+.menu button { background: none; border: 0; padding: 4px 0; cursor: pointer; border-bottom: 2px solid transparent; }
+.menu button[aria-current="page"] { border-bottom-color: var(--fg); font-weight: 600; }
+
+.page { display: flex; flex-direction: column; gap: 24px; padding-block: 20px 0; }
+.pagehead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.pagehead:empty { display: none; }
+.backbtn, .sharebtn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--bg); padding: 6px 12px; cursor: pointer; }
+.backbtn { padding-left: 8px; }
+.backbtn:hover, .sharebtn:hover { background: var(--fill); }
+.crumbs { font-size: 14px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 6px; min-width: 0; }
+.menu { margin-left: auto; }
+@media (max-width: 720px) { .menu { order: 3; flex-basis: 100%; margin-left: 0; } .topbar .sharebtn { margin-left: auto; } }
+.crumbs button { background: none; border: 0; padding: 0; color: var(--fg); text-decoration: underline; cursor: pointer; }
+.view { display: flex; flex-direction: column; gap: 24px; }
+h1 { font-size: 28px; line-height: 1.25; margin: 0; text-wrap: balance; }
+h2 { font-size: 18px; margin: 0; }
+p { margin: 0; max-width: 70ch; }
+.muted { color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 12px; }
+
+/* Placeholders */
+.img { border: 1px solid var(--line); background: var(--fill); aspect-ratio: 4 / 3; max-width: 100%; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 14px; }
+.ph { border: 1px dashed var(--line); padding: 48px 20px; color: var(--muted); text-align: center; }
+
+/* Search and filters */
+.search { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); padding: 0 14px; }
+.search svg { flex: none; color: var(--muted); }
+.search input { flex: 1; min-width: 0; border: 0; background: none; padding: 12px 0; outline: none; }
+.search:focus-within { outline: 2px solid var(--fg); outline-offset: 2px; }
+.search button { background: none; border: 0; border-left: 1px solid var(--soft); padding: 4px 0 4px 12px; cursor: pointer; }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+.flabel { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 14px; }
+.chip { border: 1px solid var(--line); background: var(--bg); padding: 6px 14px; cursor: pointer; }
+.chip:hover { background: var(--fill); }
+.count { font-size: 14px; color: var(--muted); }
+
+/* Cards and lists */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.card { display: flex; flex-direction: column; gap: 8px; text-align: left; border: 0; background: none; padding: 0; cursor: pointer; }
+.card:hover .n { text-decoration: underline; }
+.box:hover, .row:hover { background: var(--fill); }
+.card .n, .row .n { font-weight: 600; }
+.card .s, .row .s { font-size: 14px; color: var(--muted); }
+.list { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 16px; align-items: center; text-align: left; background: var(--bg); border: 0; border-bottom: 1px solid var(--line); padding: 12px 0; cursor: pointer; }
+.row .img { width: 96px; }
+.row .tagd { font-size: 13px; color: var(--muted); border: 1px solid var(--soft); padding: 2px 8px; white-space: nowrap; }
+@media (max-width: 560px) { .row { grid-template-columns: 72px minmax(0, 1fr); } .row .img { width: 72px; } .row .tagd { grid-column: 2; justify-self: start; } }
+.empty { border: 1px dashed var(--line); padding: 20px; color: var(--muted); }
+
+/* Manuscript page */
+.top { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 720px) { .top { grid-template-columns: minmax(0, 1fr); gap: 16px; } }
+.info { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 20px; margin: 0; }
+.info dt { color: var(--muted); }
+.info dd { margin: 0; }
+.links { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+@media (max-width: 400px) { .links { grid-template-columns: minmax(0, 1fr); } }
+.box { display: flex; align-items: center; text-align: left; text-decoration: none; border: 1px solid var(--line); background: var(--bg); padding: 14px 16px; cursor: pointer; min-height: 56px; }
+.box.off { border-style: dashed; color: var(--muted); cursor: default; }
+.box.off:hover { background: var(--bg); }
+.side .box { align-self: flex-start; }
+.side { display: flex; flex-direction: column; gap: 16px; }
+
+/* About + glossary */
+.team { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+.person { display: flex; flex-direction: column; gap: 6px; }
+.person .img { aspect-ratio: 1; }
+.person .s { font-size: 14px; color: var(--muted); }
+.gloss { display: flex; flex-direction: column; margin: 0; border-top: 1px solid var(--line); max-width: 860px; }
+.gloss div { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 4px 24px; padding: 12px 0; border-bottom: 1px solid var(--soft); }
+@media (max-width: 560px) { .gloss div { grid-template-columns: minmax(0, 1fr); } }
+.gloss dt { font-weight: 600; }
+.gloss dd { margin: 0; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="inner">
+    <button class="logo" type="button" data-go="home">CODEX</button>
+    <nav class="menu" id="menu" aria-label="Menu principal">
+      <button type="button" data-go="home" data-sec="home">Home</button>
+      <button type="button" data-go="inventario" data-sec="inventario">Inventário</button>
+      <button type="button" data-go="cursos" data-sec="cursos">Cursos</button>
+      <button type="button" data-go="quemsomos" data-sec="quemsomos">Quem somos</button>
+      <button type="button" data-go="glossario" data-sec="glossario">Glossário</button>
+    </nav>
+    <button class="sharebtn" type="button" id="share"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4M8 8l4-4 4 4M5 13v7h14v-7"/></svg><span>Compartilhar</span></button>
+  </div>
+</header>
+<div class="inner page">
+  <div class="pagehead" id="pagehead"></div>
+  <main class="view" id="view"></main>
+</div>
+
+<script>
+const BN = "https://objdigital.bn.br/objdigital2/acervo_digital/div_manuscritos/";
+const MSS = {
+  modelo: { nome: "Título", inst: "Nome da instituição", cota: "Cota", data: "Ano ou século", sec: "", link: null, estudo: "Trabalho principal", model: true },
+  horas:  { nome: "Livro de Horas 50,01,001", inst: "Biblioteca Nacional", cota: "50,01,001", data: "1450–1460", sec: "XV", link: BN + "mss1212389/mss1212389.pdf", estudo: "Trabalho Isamara" },
+  egidio: { nome: "Liber de Regimine Principum (Egídio Romano)", inst: "Biblioteca Nacional", cota: "50,03,02", data: "séc. XV", sec: "XV", link: BN + "mss1486624/mss1486624.pdf", estudo: "Estudo em andamento" },
+  carta:  { nome: "Carta de Afonso V à condessa de Atouguia", inst: "Museu Imperial de Petrópolis", cota: "Maço 1 Doc 5", data: "1452", sec: "XV", link: "https://dami.museuimperial.museus.gov.br/handle/acervo/1080", estudo: null }
+};
+const FILTROS = ["Instituição", "Ano", "Tipo de documento", "Disponibilidade"];
+
+// Igor's map: each node has a title and the nodes it leads to. Nodes without children are content pages.
+const MAP = {
+  acesso:      { t: null, kids: ["conteudo", "estudos", "formacao"] },
+  conteudo:    { t: "O que tem neste manuscrito?", kids: ["codicologia", "sumario"] },
+  codicologia: { t: "Descrição codicológica", kids: ["cadernos", "imagens"] },
+  cadernos:    { t: "Mapa de cadernos", kids: [] },
+  imagens:     { t: "Descrição de imagens", kids: ["img_pers", "img_ref"] },
+  img_pers:    { t: "Quais personagens?", kids: [] },
+  img_ref:     { t: "Quais referências (ex.: bíblicas)?", kids: ["img_outros"] },
+  img_outros:  { t: "Aparece em outros manuscritos?", kids: [] },
+  sumario:     { t: "Sumário de conteúdos", kids: ["partes", "sequencia"] },
+  partes:      { t: "Onde começa e termina cada parte", kids: [] },
+  sequencia:   { t: "Sequência de antífonas, versículos, salmos, responsório", kids: ["seq_pers", "seq_ref"] },
+  seq_pers:    { t: "Quais personagens?", kids: [] },
+  seq_ref:     { t: "Quais referências (ex.: bíblicas)?", kids: ["seq_outros"] },
+  seq_outros:  { t: "Aparece em outros manuscritos?", kids: [] },
+  estudos:     { t: "O que já se estudou sobre?", kids: ["principal", "outras"] },
+  principal:   { t: "Trabalho principal", kids: [] },
+  outras:      { t: "Outras referências", kids: [] },
+  formacao:    { t: "O que você precisa saber para estudar este manuscrito?", kids: ["paleo1", "paleo2"] },
+  paleo1:      { t: "Paleografia para iniciantes", kids: [] },
+  paleo2:      { t: "Paleografia nível II", kids: [] }
+};
+const PARENT = {};
+for (const [k, v] of Object.entries(MAP)) for (const c of v.kids) PARENT[c] = k;
+
+const TEAM = 4;
+const CURSOS = 3;
+const GLOSS = [["Termo", "Definição do termo."], ["Termo", "Definição do termo."], ["Termo", "Definição do termo."], ["Termo", "Definição do termo."]];
+
+const ICON_SEARCH = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/></svg>`;
+const ICON_FILTER = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>`;
+const ICON_BACK = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>`;
+
+const state = { q: "" };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const norm = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+const title = (id, node) => node === "principal" && MSS[id].estudo ? MSS[id].estudo : MAP[node].t;
+const placeholder = `<div class="ph">Conteúdo</div>`;
+const cursoCard = n => `<button class="card" type="button" data-go="curso${n}"><div class="img">Imagem</div><span class="n">Nome do curso</span><span class="s">Descrição do curso</span></button>`;
+const cursoCards = () => `<div class="cards">${Array.from({ length: CURSOS }, (_, i) => cursoCard(i + 1)).join("")}</div>`;
+
+function results() {
+  const q = norm(state.q.trim());
+  return Object.entries(MSS).filter(([, m]) => !q || norm([m.nome, m.inst, m.cota, m.data].join(" ")).includes(q));
+}
+
+function searchBar(id, action) {
+  return `<form class="search" role="search" id="${id}-form">${ICON_SEARCH}<input id="${id}" type="search" placeholder="Pesquisar manuscritos" value="${esc(state.q)}" aria-label="Pesquisar manuscritos">${action ? `<button type="submit">Pesquisar</button>` : ""}</form>`;
+}
+
+function home() {
+  return `
+    <section>
+      <h1>Título do site</h1>
+      <p class="muted">Descrição do site</p>
+    </section>
+    ${searchBar("q-home", true)}
+    <section>
+      <h2>Manuscritos</h2>
+      <div class="cards">${Object.entries(MSS).map(([id, m]) => `
+        <button class="card" type="button" data-go="${id}-acesso">
+          <div class="img">Imagem</div>
+          <span class="n">${esc(m.nome)}</span>
+          <span class="s">${esc(m.inst)} · ${esc(m.data)}</span>
+        </button>`).join("")}
+      </div>
+    </section>
+    <section>
+      <h2>Cursos e formação</h2>
+      ${cursoCards()}
+    </section>`;
+}
+
+function cursos() {
+  return `
+    <section>
+      <h1>Cursos</h1>
+      <p class="muted">Descrição dos cursos</p>
+    </section>
+    ${cursoCards()}`;
+}
+
+function curso() {
+  return `
+    <div class="top">
+      <div class="img">Imagem</div>
+      <div class="side">
+        <h1>Nome do curso</h1>
+        <p class="muted">Descrição do curso</p>
+        <div class="box">Acessar curso</div>
+      </div>
+    </div>`;
+}
+
+function listHtml() {
+  const r = results();
+  const rows = r.map(([id, m]) => `
+    <button class="row" type="button" data-go="${id}-acesso">
+      <div class="img">Imagem</div>
+      <span><span class="n">${esc(m.nome)}</span><br><span class="s">${esc(m.inst)} · ${esc(m.cota)} · ${esc(m.data)}</span></span>
+      <span class="tagd">${m.model ? "Disponibilidade" : m.link ? "Digitalizado" : "Sem acesso digital"}</span>
+    </button>`).join("");
+  return `<p class="count">${r.length} ${r.length === 1 ? "manuscrito" : "manuscritos"}</p>
+    ${r.length ? `<div class="list">${rows}</div>` : `<div class="empty">Nenhum manuscrito encontrado com esses critérios.</div>`}`;
+}
+
+function inventario() {
+  return `
+    <h1>Inventário</h1>
+    <div class="toolbar">
+    ${searchBar("q-inv", false)}
+    <div class="filters">
+      <span class="flabel">${ICON_FILTER}Filtrar por:</span>
+      ${FILTROS.map(f => `<button class="chip" type="button">${esc(f)}</button>`).join("")}
+    </div>
+    </div>
+    <div id="results">${listHtml()}</div>`;
+}
+
+function quemsomos() {
+  return `
+    <section>
+      <h1>Quem somos</h1>
+      <p class="muted">Texto sobre o laboratório e o projeto</p>
+    </section>
+    <section>
+      <h2>Equipe</h2>
+      <div class="team">${`<div class="person"><div class="img">Imagem</div><span class="n">Nome</span><span class="s">Função</span></div>`.repeat(TEAM)}</div>
+    </section>`;
+}
+
+function glossList(q) {
+  const items = GLOSS.filter(([t, d]) => !q || norm(t + " " + d).includes(norm(q)));
+  return items.length
+    ? `<dl class="gloss">${items.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join("")}</dl>`
+    : `<div class="empty">Nenhum termo encontrado.</div>`;
+}
+
+function glossario() {
+  return `
+    <h1>Glossário</h1>
+    <form class="search" role="search" id="g-form">${ICON_SEARCH}<input id="q-gloss" type="search" placeholder="Pesquisar termo" aria-label="Pesquisar termo"></form>
+    <div id="gloss">${glossList("")}</div>`;
+}
+
+function links(id, kids) {
+  return `<div class="links">${kids.map(k => `<button class="box" type="button" data-go="${id}-${k}">${esc(title(id, k))}</button>`).join("")}</div>`;
+}
+
+function page(id, node) {
+  const m = MSS[id];
+  if (node === "acesso") {
+    return `
+      <div class="top">
+        <div class="img">Imagem</div>
+        <div class="side">
+          <h1>${esc(m.nome)}</h1>
+          <dl class="info"><dt>Instituição</dt><dd>${esc(m.inst)}</dd><dt>Cota</dt><dd>${esc(m.cota)}</dd><dt>Data</dt><dd>${esc(m.data)}</dd></dl>
+          ${m.link ? `<a class="box" href="${esc(m.link)}" target="_blank" rel="noopener">Ver manuscrito digitalizado</a>` : `<div class="box">Ver manuscrito digitalizado</div>`}
+        </div>
+      </div>
+      <section><h2>Formação</h2>${links(id, MAP.acesso.kids)}</section>`;
+  }
+  const n = MAP[node];
+  let body;
+  if (node === "principal" && m.estudo === null) body = `<div class="box off">Ainda não estudado</div>`;
+  else if (n.kids.length) body = links(id, n.kids);
+  else body = placeholder;
+  return `
+    <h1>${esc(title(id, node))}</h1>
+    ${body}`;
+}
+
+function crumbs(id, node) {
+  const path = [];
+  for (let n = node; n; n = PARENT[n]) path.unshift(n);
+  const items = [`<button type="button" data-go="inventario">Inventário</button>`];
+  path.forEach((n, i) => {
+    const label = n === "acesso" ? MSS[id].nome : title(id, n);
+    items.push(i === path.length - 1 ? `<span>${esc(label)}</span>` : `<button type="button" data-go="${id}-${n}">${esc(label)}</button>`);
+  });
+  return items.join(" / ");
+}
+
+const PAGES = { home, inventario, cursos, quemsomos, glossario };
+
+// Works out what a token points to: a menu page, a course, or a page of a manuscript.
+function parse(token) {
+  const i = token.indexOf("-");
+  const id = i > 0 ? token.slice(0, i) : "", node = i > 0 ? token.slice(i + 1) : "";
+  if (MSS[id] && MAP[node]) return { kind: "ms", id, node, sec: "inventario", parent: node === "acesso" ? "inventario" : `${id}-${PARENT[node]}` };
+  if (/^curso[1-9]$/.test(token) && Number(token.slice(5)) <= CURSOS) return { kind: "curso", sec: "cursos", parent: "cursos" };
+  if (PAGES[token]) return { kind: "menu", sec: token };
+  return null;
+}
+
+function pagehead(token, p) {
+  if (p.kind === "menu") return "";
+  const trail = p.kind === "ms"
+    ? crumbs(p.id, p.node)
+    : `<button type="button" data-go="cursos">Cursos</button> / <span>Nome do curso</span>`;
+  return `<button class="backbtn" type="button" id="back">${ICON_BACK}Voltar</button>
+    <nav class="crumbs" aria-label="Caminho">${trail}</nav>`;
+}
+
+let current = "home";
+const visited = [];
+
+function render(token) {
+  token = token || "home";
+  let p = parse(token);
+  if (!p) { token = "home"; p = parse(token); }
+  const html = p.kind === "ms" ? page(p.id, p.node) : p.kind === "curso" ? curso() : PAGES[token]();
+  document.getElementById("view").innerHTML = html;
+  document.getElementById("pagehead").innerHTML = pagehead(token, p);
+  document.querySelectorAll("#menu button").forEach(b => b.toggleAttribute("aria-current", b.dataset.sec === p.sec));
+  document.querySelectorAll("#menu button[aria-current]").forEach(b => b.setAttribute("aria-current", "page"));
+  current = token;
+  return token;
+}
+
+function go(token, remember = true) {
+  if (remember && token !== current) visited.push(current);
+  const t = render(token);
+  try { history.replaceState(null, "", "#" + t); } catch (e) {}
+  window.scrollTo(0, 0);
+}
+
+// "Voltar" returns to the page the visitor came from; opened from a link, it goes one level up.
+function back() {
+  const prev = visited.pop();
+  go(prev || parse(current).parent || "home", false);
+}
+
+// While the site is being built, "Compartilhar" copies the prototype's public address so the team can open it.
+const SITE_URL = "https://isabelaf007.github.io/bolsa/";
+async function share(btn) {
+  const label = btn.querySelector("span");
+  const url = SITE_URL;
+  let ok = false;
+  try { await navigator.clipboard.writeText(url); ok = true; } catch (e) {
+    const t = document.createElement("textarea");
+    t.value = url; document.body.appendChild(t); t.select();
+    try { ok = document.execCommand("copy"); } catch (e2) {}
+    t.remove();
+  }
+  label.textContent = ok ? "Link copiado" : "Não foi possível copiar";
+  setTimeout(() => { label.textContent = "Compartilhar"; }, 2000);
+}
+
+function refreshResults() {
+  const el = document.getElementById("results");
+  if (el) el.innerHTML = listHtml();
+}
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-go]");
+  if (b) { e.preventDefault(); go(b.dataset.go); return; }
+  if (e.target.closest("#back")) back();
+  const s = e.target.closest("#share");
+  if (s) share(s);
+});
+document.addEventListener("input", e => {
+  if (e.target.id === "q-inv") { state.q = e.target.value; refreshResults(); }
+  if (e.target.id === "q-home") state.q = e.target.value;
+  if (e.target.id === "q-gloss") document.getElementById("gloss").innerHTML = glossList(e.target.value);
+});
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  if (e.target.id === "q-home-form") go("inventario");
+});
+window.addEventListener("hashchange", () => { visited.length = 0; render(location.hash.slice(1)); });
+render(location.hash.slice(1));
+</script>
+</body>
+</html>
